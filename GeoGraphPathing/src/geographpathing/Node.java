@@ -1,7 +1,9 @@
 package geographpathing;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
 
 public class Node {
 	public Node(VirtualGeography world, int id){
@@ -43,6 +45,55 @@ public class Node {
 	
 	public int getID(){
 		return id;
+	}
+	
+	public Path path(Node target){
+		HashSet<Node> checked = new HashSet<>();
+		PriorityQueue<PathCost> check = new PriorityQueue<>();
+		
+		List<Node> initial_node_list = new ArrayList<>();
+		initial_node_list.add(this);
+		Path initial_path = new Path(initial_node_list);
+		check.add(new PathCost(initial_path, initial_path.last().getGeoCoord().distance(target.getGeoCoord())));
+		
+		while(!check.isEmpty()){
+			Path current_path = check.poll().path;
+			
+			// Found
+			if(current_path.last().equals(target)){
+				return current_path;
+			}
+			
+			// Not found
+			for(Node neighbor : current_path.last().getNeighbors()){
+				if(!checked.contains(neighbor)){
+					List<Node> path_nodes = current_path.getNodes();
+					path_nodes.add(neighbor);
+					Path new_path = new Path(path_nodes);
+					check.add(new PathCost(new_path, new_path.last().getGeoCoord().distance(target.getGeoCoord())));
+				}
+			}
+			
+			// Add our check to the set of checked nodes
+			checked.add(current_path.last());
+		}
+		
+		return null;
+	}
+	
+	private class PathCost implements Comparable<PathCost> {
+		public PathCost(Path path, int cost) {
+			this.path = path;
+			this.cost = cost;
+		}
+		
+		@Override
+		public int compareTo(PathCost o) {
+			return this.cost - o.cost;
+		}
+		
+		public final Path path;
+		public final int cost;
 	}
 	
 	private GeoCoord coord;

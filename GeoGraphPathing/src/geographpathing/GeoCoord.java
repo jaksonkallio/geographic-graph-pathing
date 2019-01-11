@@ -9,6 +9,11 @@ public class GeoCoord {
 		this.y = y;
 	}
 	
+	@Override
+	public String toString(){
+		return x+","+y;
+	}
+	
 	public int distance(GeoCoord o){
 		return 0;
 	}

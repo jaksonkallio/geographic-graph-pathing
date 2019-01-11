@@ -1,7 +1,8 @@
 package geographpathing;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Random;
 
 public final class VirtualGeography {
@@ -28,6 +29,16 @@ public final class VirtualGeography {
 		printStats();
 	}
 	
+	public Node[] getRandomNodes(int count){
+		Node[] rand_nodes = new Node[count];
+		
+		for(int i = 0; i < rand_nodes.length; i++){
+			rand_nodes[i] = node_list.get(rng.nextInt(node_list.size()));
+		}
+		
+		return rand_nodes;
+	}
+	
 	private void printStats(){
 		System.out.println("Node count: " + getNodeCount());
 	}
@@ -50,6 +61,7 @@ public final class VirtualGeography {
 				Node node = new Node(this, counter);
 				node.setGeoCoord(coord);
 				nodes.put(node.getGeoCoord(), node);
+				node_list.add(node);
 			}
 			
 			counter++;
@@ -61,9 +73,9 @@ public final class VirtualGeography {
 	private void createEdges(){
 		startTimer();
 		int counter = 0;
-		for(Map.Entry<GeoCoord, Node> entry : nodes.entrySet()) {
+		for(int i = (node_list.size() - 1); i >= 0; i--) {
 			printProgress("Creating edges", counter, nodes.size());
-			Node node = entry.getValue();
+			Node node = node_list.get(i);
 			
 			for(GeoCoord near_coords : node.getGeoCoord().radius((int)(node_dist * neighborship_radius))){
 				if(nodes.containsKey(near_coords)){
@@ -76,6 +88,7 @@ public final class VirtualGeography {
 			// Node is lonely, delete
 			if(node.getNeighbors().isEmpty()){
 				nodes.remove(node.getGeoCoord());
+				node_list.remove(i);
 			}
 			
 			counter++;
@@ -86,6 +99,7 @@ public final class VirtualGeography {
 	private void initializeStorage(){
 		// Initialize the hashmap with a capacity
 		nodes = new HashMap(getNodeCount());
+		node_list = new ArrayList<>();
 	}
 	
 	private int getNodeCount(){
@@ -135,6 +149,7 @@ public final class VirtualGeography {
 	private final double node_dist_variance; // +/- Node distance variance, 0.0-1.0
 	private final Random rng;
 	private HashMap<GeoCoord, Node> nodes;
+	private List<Node> node_list;
 	private long timer_start;
 	private long last_progress_print;
 }
