@@ -1,14 +1,16 @@
 package geographpathing;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public final class VirtualGeography {
-	public VirtualGeography(int width, int height, int node_dist, double node_dist_variance){
+	public VirtualGeography(int width, int height, int node_dist, double node_dist_variance, double neighborship_radius){
 		this.width = width;
 		this.height = height;
 		this.node_dist = node_dist;
 		this.node_dist_variance = node_dist_variance;
+		this.neighborship_radius = neighborship_radius;
 		
 		rng = new Random(); 
 		
@@ -26,46 +28,60 @@ public final class VirtualGeography {
 	}
 	
 	private void createNodes() throws InvalidGenerateException {
-		int x = 0;
-		int y = 0;
+		startTimer();
+		int node_count = getNodeCount();
 		
-		// We end the generation loop when we've exhausted our vertical space
-		while(y <= height){
-			// If we reach the end of the horizontal component, reset x and increment y
-			if(x > width){
-				x = 0;
-				y += getRandDist();
-				continue;
-			}
-			
-			// Increment the x
-			x += getRandDist();
-			
-			// Verify that we're inbounds
-			if(x <= width){
-				Node node = new Node(this);
-				node.setGeoCoord(new GeoCoord(x, y));
-				
-				nodes.put(node.getGeoCoord(), node);
-				
-				// Check if we breach the maximum nodes setting
-				if(nodes.size() > MAX_NODES){
-					throw new InvalidGenerateException("Maximum node count reached");
-				}
-			}
+		// Check if we breach the maximum nodes setting
+		if(node_count > MAX_NODES){
+			throw new InvalidGenerateException("Maximum node count reached");
 		}
+		
+		int counter = 0;
+		while(nodes.size() < node_count){
+			printProgress("Creating nodes", nodes.size(), node_count);
+			GeoCoord coord = new GeoCoord(rng.nextInt(width), rng.nextInt(height));
+			
+			if(!nodes.containsKey(coord)){
+				Node node = new Node(this, counter);
+				node.setGeoCoord(coord);
+				nodes.put(node.getGeoCoord(), node);
+			}
+			
+			counter++;
+		}
+		
+		printComplete();
 	}
 	
 	private void createEdges(){
-		
+		startTimer();
+		int counter = 0;
+		for(Map.Entry<GeoCoord, Node> entry : nodes.entrySet()) {
+			printProgress("Creating edges", counter, nodes.size());
+			Node node = entry.getValue();
+			
+			for(GeoCoord near_coords : node.getGeoCoord().radius((int)(node_dist * neighborship_radius))){
+				if(nodes.containsKey(near_coords)){
+					Node near_node = nodes.get(near_coords);
+					near_node.addNeighbor(node);
+					node.addNeighbor(near_node);
+				}
+			}
+			
+			counter++;
+		}
+		printComplete();
 	}
 	
 	private void initializeStorage(){
-		// Initialize the hashmap with a capacity of 
+		// Initialize the hashmap with a capacity
+		nodes = new HashMap(getNodeCount());
+	}
+	
+	private int getNodeCount(){
 		int avg_count_x = width / node_dist;
 		int avg_count_y = height / node_dist;
-		int default_capacity = Math.min(MAX_NODES, avg_count_x * avg_count_y);
-		nodes = new HashMap(default_capacity);
+		return avg_count_x * avg_count_y;
 	}
 	
 	private int getRandDist(){
@@ -75,13 +91,40 @@ public final class VirtualGeography {
 		return dist;
 	}
 	
+	private void startTimer(){
+		timer_start = time();
+	}
+	
+	private long timerElapsed(){
+		return time() - timer_start;
+	}
+	
+	private long time(){
+		return System.currentTimeMillis();
+	}
+	
+	private void printProgress(String process, int completed, int total){
+		if((time() - last_progress_print) >= 250 || completed == total){
+			int percent = (int)(100.0 * completed / total);
+			System.out.println(process + ": " + percent + "%");
+			last_progress_print = time();
+		}
+	}
+	
+	private void printComplete(){
+		System.out.println("Done, " + timerElapsed() + "ms");
+	}
+	
 	public static final int MAX_NODES = 1000000;
 	public static final long RNG_SEED = 445566;
 	
 	private final int width; // Meters
 	private final int height; // Meters
 	private final int node_dist; // Average node distance, in meters
+	private final double neighborship_radius; // Any nodes within node_dist * neighborship_radius become neighbors
 	private final double node_dist_variance; // +/- Node distance variance, 0.0-1.0
 	private final Random rng;
 	private HashMap<GeoCoord, Node> nodes;
+	private long timer_start;
+	private long last_progress_print;
 }

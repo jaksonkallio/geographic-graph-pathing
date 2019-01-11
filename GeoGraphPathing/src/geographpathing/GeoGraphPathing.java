@@ -11,7 +11,7 @@ package geographpathing;
  */
 public class GeoGraphPathing {
 	public static void main(String[] args) {
-		
+		VirtualGeography world = new VirtualGeography(1000, 1000, 10, 0.2, 2.0);
 	}
 	
 }

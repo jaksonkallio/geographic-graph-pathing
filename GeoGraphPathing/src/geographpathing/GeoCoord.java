@@ -1,5 +1,8 @@
 package geographpathing;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GeoCoord {
 	public GeoCoord(int x, int y){
 		this.x = x;
@@ -8,6 +11,18 @@ public class GeoCoord {
 	
 	public int distance(GeoCoord o){
 		return 0;
+	}
+	
+	public List<GeoCoord> radius(int r){
+		ArrayList<GeoCoord> contents = new ArrayList<>();
+		
+		for(int r_x = x - r; r_x <= x + r; r_x++){
+			for(int r_y = y - r; r_y <= y + r; r_y++){
+				contents.add(new GeoCoord(r_x, r_y));
+			}	
+		}
+		
+		return contents;
 	}
 	
 	@Override
