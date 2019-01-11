@@ -13,7 +13,7 @@ public final class VirtualGeography {
 		this.node_dist_variance = node_dist_variance;
 		this.neighborship_radius = neighborship_radius;
 		
-		rng = new Random(); 
+		rng = new Random(RNG_SEED); 
 		
 		try {
 			generate();

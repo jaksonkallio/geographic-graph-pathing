@@ -48,6 +48,10 @@ public class Node {
 	}
 	
 	public Path path(Node target){
+		int max_check_size = 0;
+		
+		Path found_path = null;
+		
 		HashSet<Node> checked = new HashSet<>();
 		PriorityQueue<PathCost> check = new PriorityQueue<>();
 		
@@ -61,7 +65,8 @@ public class Node {
 			
 			// Found
 			if(current_path.last().equals(target)){
-				return current_path;
+				found_path = current_path;
+				break;
 			}
 			
 			// Not found
@@ -76,9 +81,16 @@ public class Node {
 			
 			// Add our check to the set of checked nodes
 			checked.add(current_path.last());
+			
+			if(check.size() > max_check_size){
+				max_check_size = check.size();
+			}
 		}
 		
-		return null;
+		System.out.println("Largest check queue size: " + max_check_size);
+		System.out.println("Checked set size: " + checked.size());
+		
+		return found_path;
 	}
 	
 	private class PathCost implements Comparable<PathCost> {
