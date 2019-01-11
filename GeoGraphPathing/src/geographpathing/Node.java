@@ -33,6 +33,10 @@ public class Node {
 		}
 	}
 	
+	public List<Node> getNeighbors(){
+		return neighbors;
+	}
+	
 	public GeoCoord getGeoCoord(){
 		return coord;
 	}

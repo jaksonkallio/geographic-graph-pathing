@@ -25,6 +25,11 @@ public final class VirtualGeography {
 		initializeStorage();
 		createNodes();
 		createEdges();
+		printStats();
+	}
+	
+	private void printStats(){
+		System.out.println("Node count: " + getNodeCount());
 	}
 	
 	private void createNodes() throws InvalidGenerateException {
@@ -66,6 +71,11 @@ public final class VirtualGeography {
 					near_node.addNeighbor(node);
 					node.addNeighbor(near_node);
 				}
+			}
+			
+			// Node is lonely, delete
+			if(node.getNeighbors().isEmpty()){
+				nodes.remove(node.getGeoCoord());
 			}
 			
 			counter++;
@@ -115,7 +125,7 @@ public final class VirtualGeography {
 		System.out.println("Done, " + timerElapsed() + "ms");
 	}
 	
-	public static final int MAX_NODES = 1000000;
+	public static final int MAX_NODES = 10000000;
 	public static final long RNG_SEED = 445566;
 	
 	private final int width; // Meters
