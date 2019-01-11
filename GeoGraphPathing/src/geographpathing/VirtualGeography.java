@@ -12,10 +12,14 @@ public final class VirtualGeography {
 		
 		rng = new Random(); 
 		
-		generate();
+		try {
+			generate();
+		}catch(InvalidGenerateException ex){
+			System.out.println("Could not generate geography: " + ex.message());
+		}
 	}
 	
-	public void generate(){
+	public void generate() throws InvalidGenerateException {
 		int x = 0;
 		int y = 0;
 		
@@ -26,6 +30,7 @@ public final class VirtualGeography {
 		nodes = new HashMap(default_capacity);
 		
 		// We end the generation loop when we've exhausted our vertical space
+		// Or when we reach our max nodes count
 		while(y <= height){
 			// If we reach the end of the horizontal component, reset x and increment y
 			if(x > width){
@@ -43,6 +48,10 @@ public final class VirtualGeography {
 				node.setGeoCoord(new GeoCoord(x, y));
 				
 				nodes.put(node.getGeoCoord(), node);
+				
+				if(nodes.size() > MAX_NODES){
+					throw new InvalidGenerateException("Maximum node count reached");
+				}
 			}
 		}
 	}
