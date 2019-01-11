@@ -59,6 +59,7 @@ public class Node {
 		initial_node_list.add(this);
 		Path initial_path = new Path(initial_node_list);
 		check.add(new PathCost(initial_path, initial_path.last().getGeoCoord().distance(target.getGeoCoord())));
+		checked.add(this);
 		
 		while(!check.isEmpty()){
 			Path current_path = check.poll().path;
@@ -72,15 +73,14 @@ public class Node {
 			// Not found
 			for(Node neighbor : current_path.last().getNeighbors()){
 				if(!checked.contains(neighbor)){
+					// Add our check to the set of checked nodes
+					checked.add(neighbor);
 					List<Node> path_nodes = current_path.getNodes();
 					path_nodes.add(neighbor);
 					Path new_path = new Path(path_nodes);
 					check.add(new PathCost(new_path, new_path.last().getGeoCoord().distance(target.getGeoCoord())));
 				}
 			}
-			
-			// Add our check to the set of checked nodes
-			checked.add(current_path.last());
 			
 			if(check.size() > max_check_size){
 				max_check_size = check.size();
@@ -89,6 +89,12 @@ public class Node {
 		
 		System.out.println("Largest check queue size: " + max_check_size);
 		System.out.println("Checked set size: " + checked.size());
+		
+		if(found_path != null){
+			System.out.println("Path length: " + found_path.length());
+		}else{
+			System.out.println("No path found.");
+		}
 		
 		return found_path;
 	}

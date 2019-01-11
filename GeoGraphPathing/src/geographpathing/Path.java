@@ -26,6 +26,10 @@ public class Path {
 		return nodes.get(nodes.size() - 1);
 	}
 	
+	public int length(){
+		return nodes.size();
+	}
+	
 	public List<Node> getNodes(){
 		return nodes;
 	}
