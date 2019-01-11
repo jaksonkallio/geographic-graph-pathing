@@ -39,7 +39,10 @@ public final class VirtualGeography {
 			
 			// Verify that we're inbounds
 			if(x <= width){
+				Node node = new Node(this);
+				node.setGeoCoord(new GeoCoord(x, y));
 				
+				nodes.put(node.getGeoCoord(), node);
 			}
 		}
 	}
