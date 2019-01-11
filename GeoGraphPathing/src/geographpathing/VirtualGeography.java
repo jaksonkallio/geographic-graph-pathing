@@ -20,17 +20,16 @@ public final class VirtualGeography {
 	}
 	
 	public void generate() throws InvalidGenerateException {
+		initializeStorage();
+		createNodes();
+		createEdges();
+	}
+	
+	private void createNodes() throws InvalidGenerateException {
 		int x = 0;
 		int y = 0;
 		
-		// Initialize the hashmap with a capacity of 
-		int avg_count_x = width / node_dist;
-		int avg_count_y = height / node_dist;
-		int default_capacity = Math.min(MAX_NODES, avg_count_x * avg_count_y);
-		nodes = new HashMap(default_capacity);
-		
 		// We end the generation loop when we've exhausted our vertical space
-		// Or when we reach our max nodes count
 		while(y <= height){
 			// If we reach the end of the horizontal component, reset x and increment y
 			if(x > width){
@@ -49,11 +48,24 @@ public final class VirtualGeography {
 				
 				nodes.put(node.getGeoCoord(), node);
 				
+				// Check if we breach the maximum nodes setting
 				if(nodes.size() > MAX_NODES){
 					throw new InvalidGenerateException("Maximum node count reached");
 				}
 			}
 		}
+	}
+	
+	private void createEdges(){
+		
+	}
+	
+	private void initializeStorage(){
+		// Initialize the hashmap with a capacity of 
+		int avg_count_x = width / node_dist;
+		int avg_count_y = height / node_dist;
+		int default_capacity = Math.min(MAX_NODES, avg_count_x * avg_count_y);
+		nodes = new HashMap(default_capacity);
 	}
 	
 	private int getRandDist(){
