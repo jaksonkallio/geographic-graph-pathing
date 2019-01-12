@@ -2,8 +2,10 @@ package geographpathing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public final class VirtualGeography {
 	public VirtualGeography(int width, int height, int node_dist, double node_dist_variance, int neighbor_count){
@@ -52,7 +54,86 @@ public final class VirtualGeography {
 		}
 		
 		int counter = 0;
+		int x = 0;
+		int y = 0;
+		Set<Node> network = new HashSet<>();
+		node_map.add(new ArrayList<>());
+		while(y <= height){
+			if(x > width){
+				x = 0;
+				y += getRandDist();
+				node_map.add(new ArrayList<>());
+				continue;
+			}
+			
+			x += getRandDist();
+			Node new_node = new Node(this, counter);
+			GeoCoord coord = new GeoCoord(x, y);
+			counter++;
+			
+			node_map.get(node_map.size() - 1).add(new_node);
+			node_list.add(new_node);
+			
+			// The first node is automatically added to the network
+			if(node_list.size() == 1){
+				network.add(new_node);
+			}
+		}
 		
+		// Now we create the neighborships
+		for(int r = 0; r < node_map.size(); r++){
+			for(int c = 0; c < node_map.get(r).size(); c++){
+				Node current_node = node_map.get(r).get(c);
+				
+				for(int j = 0; j < 4; j++){
+					if(rng.nextBoolean()){
+						int n_map_x = 0;
+						int n_map_y = 0;
+						
+						switch(j){
+							case 0:
+								if(r < (node_map.size() - 1)){
+									n_map_x = 1;
+								}
+								break;
+							case 1:
+								if(c < (node_map.get(r).size() - 1)){
+									n_map_y = 1;
+								}
+								break;
+							case 2:
+								if(r > 0){
+									n_map_x = -1;
+								}
+								break;
+							case 3:
+								if(c > 0){
+									n_map_y = -1;
+								}
+								break;
+						}
+						
+						if(!(n_map_y == 0 && n_map_x == 0)){
+							Node neighbor = node_map.get(r + n_map_x).get(r + n_map_y);
+							current_node.addNeighbor(neighbor);
+							neighbor.addNeighbor(current_node);
+							
+							// Network contains our neighbor
+							if(network.contains(neighbor)){
+								// Add us to network
+								network.add(current_node);
+							}
+							
+							// Network contains our node
+							if(network.contains(current_node)){
+								// Add our neighbor to the network
+								network.add(neighbor);
+							}
+						}
+					}
+				}
+			}
+		}
 		
 		printComplete();
 	}
@@ -61,6 +142,7 @@ public final class VirtualGeography {
 		// Initialize the hashmap with a capacity
 		nodes = new HashMap(getNodeCount());
 		node_list = new ArrayList<>();
+		node_map = new ArrayList<>();
 	}
 	
 	private int getNodeCount(){
@@ -111,6 +193,7 @@ public final class VirtualGeography {
 	private final Random rng;
 	private HashMap<GeoCoord, Node> nodes;
 	private List<Node> node_list;
+	private ArrayList<ArrayList<Node>> node_map;
 	private long timer_start;
 	private long last_progress_print;
 }
