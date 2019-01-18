@@ -11,7 +11,7 @@ package geographpathing;
  */
 public class GeoGraphPathing {
 	public static void main(String[] args) {
-		VirtualGeography world = new VirtualGeography(100, 100, 2, 0.0, 5);
+		VirtualGeography world = new VirtualGeography();
 		
 		Node[] rand_nodes = world.getRandomNodes(2);
 		System.out.println("Finding path from "+rand_nodes[0].getGeoCoord().toString()+" to "+rand_nodes[1].getGeoCoord().toString());
